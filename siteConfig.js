@@ -160,7 +160,7 @@ const schema = {
   pullRequestBody: {
     doc: 'Text to be used as the pull request body when pushing moderated entries.',
     format: String,
-    default: 'Dear human,\n\nHere\'s a new entry for your approval. :tada:\n\nMerge the pull request to accept it, or close it to send it away.\n\n:heart: Your friend [Staticman](https://staticman.net) :muscle:\n\n---\n'
+    default: 'Dear *countermap moderator,\n\nHere\'s a new entry for your approval. :tada:\n\nMerge the pull request to accept it, or close it to send it away.\n\n\n---\n'
   },
   requiredFields: {
     doc: 'An array with the names of the fields that must be supplies as part of an entry. If any of these is not present, the entry will be discarded and an error will be thrown.',
