@@ -119,13 +119,6 @@ class StaticmanAPI {
         return version.toString() === req.params.version
       })
 
-      if (!versionMatch) {
-        return res.status(400).send({
-          success: false,
-          errorCode: 'INVALID_VERSION'
-        })
-      }
-
       return next()
     }
   }
