@@ -5,20 +5,25 @@
   "main": "index.js",
   "scripts": {
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
-    "start": "node index.js",
-    "test": "standard && jest",
-    "test-dev": "TEST_DEV=true jest --watch",
-    "debug": "nodemon --inspect index.js"
+    "clean": "rm -rf build && mkdir build",
+    "build-babel": "babel source -d ./build",
+    "build": "npm run clean && npm run build-babel",
+    "start": "npm run build && node build/index.js",
+    "start-dev": "nodemon --exec babel-node -- source/index.js",
+    "pretest": "eslint .",
+    "test": "jest",
+    "test-dev": "jest --watch --silent",
+    "debug": "nodemon --inspect source/index.js"
   },
   "engines": {
-    "node": ">=8.11.3"
+    "node": ">=14.15.1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eduardoboucas/staticman.git"
   },
   "author": "Eduardo Boucas <mail@eduardoboucas.com> (https://eduardoboucas.com/)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/eduardoboucas/staticman/issues"
   },
@@ -31,15 +36,16 @@
     "akismet": "^1.0.0",
     "body-parser": "^1.17.x",
     "bunyan-slack": "0.0.10",
-    "convict": "^4.3.0",
+    "convict": "^6.2.0",
     "express": "^4.14.0",
     "express-brute": "^0.6.0",
     "express-github-webhook": "^1.0.5",
+    "express-jsdoc-swagger": "^1.6.4",
     "express-recaptcha": "^2.1.0",
     "gitlab": "^3.5.1",
-    "js-yaml": "^3.10.0",
-    "jsonwebtoken": "^8.4.0",
-    "mailgun-js": "^0.22.0",
+    "got": "^11.8.2",
+    "js-yaml": "^3.14.1",
+    "mailgun.js": "^3.5.7",
     "markdown-table": "^1.0.0",
     "md5": "^2.1.0",
     "moment": "^2.18.1",
@@ -47,25 +53,35 @@
     "nodemon": "^1.19.4",
     "object-path": "^0.11.1",
     "request-promise": "^4.2.2",
-    "sha1": "^1.1.1",
     "slug": "^0.9.3",
     "universal-analytics": "^0.4.2",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.15.0",
+    "@babel/eslint-parser": "^7.15.0",
+    "@babel/node": "^7.14.9",
+    "@babel/preset-env": "^7.15.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.24.0",
+    "eslint-plugin-jest": "^24.4.0",
     "front-matter": "^2.1.2",
+    "husky": "^4.3.8",
     "istanbul-cobertura-badger": "^1.3.0",
-    "jest": "^23.6.0",
-    "lodash": "^4.17.15",
-    "nock": "^11.7.0",
-    "standard": "^10.0.2"
+    "jest": "^26.6.3",
+    "lint-staged": "^10.5.4",
+    "lodash": "^4.17.21",
+    "nock": "^11.7.0"
   },
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "controllers/**/*.js",
-      "lib/**/*.js",
-      "*.js"
+      "source/controllers/**/*.js",
+      "source/lib/**/*.js",
+      "source/*.js"
     ],
     "coverageReporters": [
       "cobertura"
@@ -79,12 +95,68 @@
       "*/**/test/unit/**/*.test.js"
     ]
   },
-  "standard": {
-    "env": [
-      "jest"
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js}": [
+      "npx prettier --write",
+      "npx eslint --fix"
     ],
-    "ignore": [
-      "test/**/*"
+    "*.{json,md,yml}": [
+      "npx prettier --write"
     ]
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "airbnb/base",
+      "plugin:jest/style",
+      "prettier"
+    ],
+    "ignorePatterns": [
+      "build/*"
+    ],
+    "parser": "@babel/eslint-parser",
+    "rules": {
+      "global-require": "off",
+      "no-console": "off",
+      "no-underscore-dangle": "off",
+      "no-use-before-define": [
+        "error",
+        {
+          "functions": false
+        }
+      ]
+    },
+    "overrides": [
+      {
+        "env": {
+          "jest": true
+        },
+        "files": [
+          "test/**/*.js"
+        ],
+        "plugins": [
+          "jest"
+        ],
+        "rules": {
+          "no-unused-vars": [
+            "error",
+            {
+              "args": "none"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true
   }
 }
